@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>等等再做 ｜ DO IT LATER ｜ 拖延症清除器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div id="app" data-screen="start">
+
+  <!-- ===================== 頂端系統列 / HUD ===================== -->
+  <header class="menubar" id="menubar">
+    <div class="menubar__left">
+      <span class="menubar__logo">等等再做</span>
+      <span class="menubar__sep">/</span>
+      <span class="menubar__sub">DO IT LATER</span>
+    </div>
+
+    <div class="menubar__center">
+      <div class="stat"><span class="stat__k">已完成</span><span class="stat__v" id="hud-cleared">0</span></div>
+      <div class="stat"><span class="stat__k">系統新增</span><span class="stat__v stat__v--alt" id="hud-generated">0</span></div>
+      <div class="stat stat--phase"><span class="stat__k">狀態</span><span class="stat__v" id="hud-phase">可控</span></div>
+      <div class="pressure">
+        <span class="pressure__k">壓力</span>
+        <span class="pressure__bar" id="pressure-bar"></span>
+      </div>
+    </div>
+
+    <div class="menubar__right">
+      <span class="menubar__clock" id="hud-clock">00:00</span>
+      <button class="toggle" id="toggle-sound" data-on="1" title="音效開關">
+        <span class="toggle__ico">♪</span><span class="toggle__state">音效 開</span>
+      </button>
+      <button class="toggle" id="toggle-motion" data-on="0" title="減少動態效果">
+        <span class="toggle__ico">◐</span><span class="toggle__state">減少動態 關</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== 互動畫面 ===================== -->
+  <main id="playfield" class="playfield"></main>
+
+  <!-- 壓力升高時疊加的暗角 / 雜訊層 -->
+  <div class="overlay-vignette" aria-hidden="true"></div>
+
+  <!-- ===================== 鏡頭小視窗（右下角） ===================== -->
+  <div id="camera" class="camera">
+    <div class="camera__head">
+      <span class="camera__dot"></span>
+      <span class="camera__label">鏡頭 · 本機處理</span>
+      <button id="cam-close" class="camera__close" title="關閉鏡頭">×</button>
+    </div>
+    <div class="camera__view">
+      <video id="cam-video" playsinline muted></video>
+      <canvas id="cam-skeleton" width="240" height="135"></canvas>
+    </div>
+  </div>
+
+  <!-- 手勢游標 -->
+  <div id="hand-cursor" class="hand-cursor" data-state="point"></div>
+
+  <!-- ===================== 開始畫面 ===================== -->
+  <section id="screen-start" class="screen screen-start is-on">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="start">
+      <div class="start__meta">
+        <span>拖延症清除器</span>
+        <span>PROCRASTINATION · CLEARER</span>
+        <span>桌面版 16:9 · 滑鼠 / 鏡頭手勢</span>
+      </div>
+
+      <div class="start__hero">
+        <h1 class="start__title">
+          <span class="start__bracket">《</span><span class="start__title-main">等等再做</span><span class="start__bracket">》</span>
+        </h1>
+        <p class="start__en">DO&nbsp;IT&nbsp;LATER</p>
+        <p class="start__lead">你清除的每一件事，<br />都會長出更多事情。</p>
+      </div>
+
+      <div class="start__panel">
+        <p class="start__how">
+          使用<b>滑鼠</b>，或開啟<b>鏡頭</b>用手勢，<br class="only-wide" />清除畫面中不斷出現的待辦事項。
+        </p>
+        <div class="start__btns">
+          <button id="btn-start" class="btn btn--primary">開始整理</button>
+          <button id="btn-camera" class="btn">開啟鏡頭</button>
+          <button id="btn-mouse" class="btn btn--ghost">僅使用滑鼠</button>
+        </div>
+        <p class="start__note">
+          鏡頭影像僅在瀏覽器本機處理，不會上傳或儲存。<br />
+          若不同意鏡頭權限，仍可用滑鼠完整體驗。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 最終訊息畫面 ===================== -->
+  <section id="screen-finale" class="screen screen-finale">
+    <div class="finale">
+      <p class="finale__core">你只是把拖延，<br />變成了另一種忙碌。</p>
+      <div class="finale__stats">
+        <div class="fstat"><span class="fstat__v" id="stat-cleared">0</span><span class="fstat__k">你清除了待辦事項</span></div>
+        <div class="fstat fstat--alt"><span class="fstat__v" id="stat-generated">0</span><span class="fstat__k">系統產生了新任務</span></div>
+      </div>
+      <p class="finale__ask">你真的完成了嗎？</p>
+      <div class="finale__btns">
+        <button id="btn-again" class="btn btn--primary">再整理一次</button>
+        <button id="btn-rest" class="btn btn--ghost">先休息一下</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 休息畫面 ===================== -->
+  <section id="screen-rest" class="screen screen-rest">
+    <div class="rest">
+      <p class="rest__msg">休息，<br />也可以是一件需要完成的事。</p>
+      <button id="btn-rest-back" class="btn btn--ghost">回到開始</button>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+</div>
+
+<!-- 載入順序：設定 → 資料 → 音效 → 元件 → 引擎 → 手勢 → 主程式 -->
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/items.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/gestures.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
